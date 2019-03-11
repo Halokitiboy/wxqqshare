@@ -1,3 +1,4 @@
+'use strict'
 const wxapi = '//res.wx.qq.com/open/js/jweixin-1.4.0.js'
 const qqapi = '//open.mobile.qq.com/sdk/qqapi.js?_bid=156'
 let reqUrl = ''
@@ -13,14 +14,17 @@ let reqUrl = ''
 const shareConfig = {
   title: '', // 分享标题
   summary: '', // 分享描述
-  desc: '', // 分享描述
   url: '', // 分享链接
-  link: '', // 分享链接
   pic: '', // 分享图标
-  imgUrl: '', // 分享图标
-  hideAll: false
+  debug: false, // 调试
+  hideAllNonBaseMenuItem: false, // 隐藏所有基础类
+  conf: {
+    // appId: '', // 必填，公众号的唯一标识
+  // timestamp: '', // 必填，生成签名的时间戳
+  // nonceStr: '', // 必填，生成签名的随机串
+  // signature: '',// 必填，签名
+  }
 }
-
 function require (url, onload) {
   var doc = document
   var head = doc.head || (doc.getElementsByTagName('head')[0] || doc.documentElement)
@@ -49,19 +53,17 @@ function init (opts) {
  * ajaxUrl // 服务器请求地址
  * @param {*} param0
  */
-function wxqqshare ({ title, desc, link, imgUrl, ajaxUrl = '' } = {}) {
+function wxqqshare ({ title, desc, link, imgUrl, ajaxUrl = '', debug = false, config } = {}) {
   if (typeof title === 'undefined' || title === '') { return console.warn('title为必填项') }
   if (typeof desc === 'undefined' || desc === '') { return console.warn('desc为必填项') }
   if (typeof link === 'undefined' || link === '') { return console.warn('link为必填项') }
   if (typeof imgUrl === 'undefined' || imgUrl === '') { return console.warn('imgUrl为必填项') }
-
   shareConfig.title = title
   shareConfig.summary = desc
-  shareConfig.desc = desc
   shareConfig.url = link
-  shareConfig.link = link
   shareConfig.pic = imgUrl
-  shareConfig.imgUrl = imgUrl
+  shareConfig.debug = debug
+  shareConfig.conf = Object.assign({}, config)
   reqUrl = ajaxUrl
   init(shareConfig)
 }
@@ -69,12 +71,61 @@ function wxqqshare ({ title, desc, link, imgUrl, ajaxUrl = '' } = {}) {
  * 微信分享设置
  * @param {*} wxConfig
  */
-function _initWX (wxConfig) {
-  require([wxapi], function (wx) {
+function _initWX ({ title, summary, url, pic, debug, conf }) {
+  require([wxapi], async function (wx) {
     if (!wx.config) {
       wx = window.wx
     }
-    let xmlhttp
+    let data
+    if (Object.keys(conf).length === 4) {
+      data = Object.assign({}, conf)
+    } else if (reqUrl && reqUrl !== '') {
+      data = await fetchConfig(reqUrl)
+    } else {
+      console.warn('设置微信分享config或者ajaxUrl必填一项')
+    }
+    data.debug = debug
+    data.jsApiList = [
+      'onMenuShareTimeline',
+      'onMenuShareAppMessage',
+      'updateAppMessageShareData',
+      'updateTimelineShareData',
+      'hideAllNonBaseMenuItem',
+      'showAllNonBaseMenuItem',
+      'hideMenuItems'
+    ]
+    // 通过config接口注入权限验证配置
+    wx.config(data)
+    // 通过ready接口处理成功验证
+    wx.ready(() => {
+      const opts = {
+        title: title, // 分享标题
+        desc: summary, // 分享描述
+        link: url, // 分享链接
+        imgUrl: pic // 分享图标
+      }
+      // 分享给朋友”及“分享到QQ”
+      wx.updateAppMessageShareData(opts)
+      // “分享到朋友圈”及“分享到QQ空间”
+      wx.updateTimelineShareData(opts)
+      // 兼容低版本微信
+      // 分享到朋友圈
+      wx.onMenuShareTimeline(opts)
+      // 分享给朋友
+      wx.onMenuShareAppMessage(opts)
+      //  分享给qq
+      wx.onMenuShareQQ(opts)
+      // 分享到腾讯微博
+      wx.onMenuShareWeibo(opts)
+      // 显示按钮
+      // 隐藏菜单项 默认全部显示
+    })
+    wx.error(() => {})
+  })
+}
+function fetchConfig (ajaxUrl) {
+  return new Promise((resolve, reject) => {
+    let xmlhttp = null
     if (window.XMLHttpRequest) {
       xmlhttp = new XMLHttpRequest()
     }
@@ -83,78 +134,16 @@ function _initWX (wxConfig) {
         let data
         try {
           data = eval(`(${xmlhttp.responseText})`)
+          resolve(data.data)
         } catch (e) {
           data = {}
+          reject(xmlhttp)
         }
-        data = data.data
-        data.jsApiList = [
-          'onMenuShareTimeline',
-          'closeWindow',
-          'onMenuShareAppMessage',
-          'hideAllNonBaseMenuItem',
-          'showMenuItems',
-          'showAllNonBaseMenuItem',
-          'hideMenuItems'
-        ]
-        // 通过config接口注入权限验证配置
-        wx.config(data)
-        // 通过ready接口处理成功验证
-        wx.ready(() => {
-          const opts = {
-            title: wxConfig.title, // 分享标题
-            desc: wxConfig.summary, // 分享描述
-            link: wxConfig.link, // 分享链接
-            imgUrl: wxConfig.imgUrl // 分享图标
-          }
-          if (wxConfig.hideAll) {
-            // 分享给朋友”及“分享到QQ”
-            wx.updateAppMessageShareData(opts)
-            // “分享到朋友圈”及“分享到QQ空间”
-            wx.updateTimelineShareData(opts)
-            // 兼容低版本微信
-                // 分享到朋友圈
-                wx.onMenuShareTimeline(opts)
-                // 分享给朋友
-                wx.onMenuShareAppMessage(opts)
-                //  分享给qq
-                wx.onMenuShareQQ(opts)
-            // 分享到腾讯微博
-            wx.onMenuShareWeibo(opts)
-            // 显示按钮
-            wx.showMenuItems({
-              menuList: [
-                'menuItem:share:appMessage',
-                'menuItem:share:timeline',
-                'menuItem:favorite'
-              ] // 要显示的菜单项
-            })
-          } else {
-            console.log('opts', opts)
-            wx.showAllNonBaseMenuItem()
-            // 分享给朋友”及“分享到QQ”
-            wx.updateAppMessageShareData(opts)
-            // “分享到朋友圈”及“分享到QQ空间”
-            wx.updateTimelineShareData(opts)
-            // 兼容低版本微信
-                // 分享到朋友圈
-                wx.onMenuShareTimeline(opts)
-                // 分享给朋友
-                wx.onMenuShareAppMessage(opts)
-                //  分享给qq
-                wx.onMenuShareQQ(opts)
-            // 分享到腾讯微博
-            wx.onMenuShareWeibo(opts)
-            wx.hideMenuItems({
-              menuList: ['menuItem:openWithQQBrowser'] // 要屏蔽的菜单项
-            })
-          }
-        })
-        wx.error(() => {})
       }
     }
     xmlhttp.open(
       'GET',
-      reqUrl,
+      ajaxUrl,
       true
     )
     xmlhttp.send()
@@ -165,7 +154,7 @@ function _initWX (wxConfig) {
  * @param {*} data
  */
 function _initQQ (data) {
-  var info = { title: data.title, desc: data.summary, share_url: data.url, image_url: data.pic }
+  var info = { title: data.title, desc: data.summary, share_url: data.url, image_url: data.pic, imageUrl: data.pic }
   function doQQShare () {
     try {
       if (data.callback) {

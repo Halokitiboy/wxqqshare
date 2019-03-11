@@ -24,11 +24,18 @@ share({
     desc:'', // 描述 (必填)
     link:'',  // 链接 (必填)
     imgUrl:'', // 分享图 (必填)
-    ajaxUrl:''  // 用于获取wx.config认证配置（{appId,timestamp,nonceStr,signature}）的接口请求地址 
+    config:{
+        appId: '', // 必填，公众号的唯一标识
+        timestamp: '', // 必填，生成签名的时间戳
+        nonceStr: '', // 必填，生成签名的随机串
+        signature: '',// 必填，签名
+    }
+    //ajaxUrl:''   用于获取wx.config认证配置（{appId,timestamp,nonceStr,signature}）的接口请求地址 
 })
 ```
+##### 微信分享config与ajaxUrl二者配置其一即可 ，若只做QQ客户端分享两者可忽略
 
 ## ToDo
 - [x] 支持1.4.0
-- [ ] 支持分享自有配置
+- [ ] 支持分享自由配置
 - [ ] 支持更多接口
