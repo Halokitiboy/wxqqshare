@@ -4,6 +4,7 @@
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
 #### 可用于微信，QQ客户端内容分享 （jsweixin-1.4.0）
+##### [问题反馈](https://github.com/Halokitiboy/wxqqshare/issues)
 
 ## 安装
 ```
@@ -23,7 +24,7 @@ share({
     desc:'', // 描述 (必填)
     link:'',  // 链接 (必填)
     imgUrl:'', // 分享图 (必填)
-    ajaxUrl:''  // 用于获取wx.config认证配置
+    ajaxUrl:''  // 用于获取wx.config认证配置（{appId,timestamp,nonceStr,signature}）的接口请求地址 
 })
 ```
 

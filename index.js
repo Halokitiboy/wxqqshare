@@ -76,8 +76,6 @@ function _initWX (wxConfig) {
     }
     let xmlhttp
     if (window.XMLHttpRequest) {
-      // code for IE7+, Firefox, Chrome, Opera,
-      // Safari
       xmlhttp = new XMLHttpRequest()
     }
     xmlhttp.onreadystatechange = function () {
@@ -113,6 +111,13 @@ function _initWX (wxConfig) {
             wx.updateAppMessageShareData(opts)
             // “分享到朋友圈”及“分享到QQ空间”
             wx.updateTimelineShareData(opts)
+            // 兼容低版本微信
+                // 分享到朋友圈
+                wx.onMenuShareTimeline(opts)
+                // 分享给朋友
+                wx.onMenuShareAppMessage(opts)
+                //  分享给qq
+                wx.onMenuShareQQ(opts)
             // 分享到腾讯微博
             wx.onMenuShareWeibo(opts)
             // 显示按钮
@@ -121,7 +126,7 @@ function _initWX (wxConfig) {
                 'menuItem:share:appMessage',
                 'menuItem:share:timeline',
                 'menuItem:favorite'
-              ] // 要显示的菜单项，所有menu项见附录3
+              ] // 要显示的菜单项
             })
           } else {
             console.log('opts', opts)
@@ -130,10 +135,17 @@ function _initWX (wxConfig) {
             wx.updateAppMessageShareData(opts)
             // “分享到朋友圈”及“分享到QQ空间”
             wx.updateTimelineShareData(opts)
+            // 兼容低版本微信
+                // 分享到朋友圈
+                wx.onMenuShareTimeline(opts)
+                // 分享给朋友
+                wx.onMenuShareAppMessage(opts)
+                //  分享给qq
+                wx.onMenuShareQQ(opts)
             // 分享到腾讯微博
             wx.onMenuShareWeibo(opts)
             wx.hideMenuItems({
-              menuList: ['menuItem:openWithQQBrowser'] // 要屏蔽的菜单项，所有menu项见附录3
+              menuList: ['menuItem:openWithQQBrowser'] // 要屏蔽的菜单项
             })
           }
         })
