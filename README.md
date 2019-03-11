@@ -37,13 +37,13 @@ share({
 ##### 微信分享config与ajaxUrl二者配置其一即可 ，若只做QQ客户端分享两者可忽略
 
 ##### 分享到朋友圈
-![分享到朋友圈](https://github.com/Halokitiboy/wxqqshare/blob/master/01.jpeg)
+![分享到朋友圈](https://github.com/Halokitiboy/wxqqshare/blob/master/01.jpeg =300)
 ##### 分享到QQ空间
-![分享到QQ空间](https://github.com/Halokitiboy/wxqqshare/blob/master/02.jpeg)
+![分享到QQ空间](https://github.com/Halokitiboy/wxqqshare/blob/master/02.jpeg =300)
 ##### 分享到QQ
-![分享到QQ](https://github.com/Halokitiboy/wxqqshare/blob/master/03.jpeg)
+![分享到QQ](https://github.com/Halokitiboy/wxqqshare/blob/master/03.jpeg =300)
 ##### 分享到微信朋友
-![分享到微信朋友](https://github.com/Halokitiboy/wxqqshare/blob/master/04.jpeg)
+![分享到微信朋友](https://github.com/Halokitiboy/wxqqshare/blob/master/04.jpeg =300)
 
 ## ToDo
 - [x] 支持1.4.0
