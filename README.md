@@ -20,6 +20,7 @@ yarn add wxqqshare
 import {share} from 'wxqqshare'
 
 share({
+    debug: false // 开启调试模式,调用的所有api的返回值会在客户端alert出来 默认为false
     title:'', // 标题 (必填)
     desc:'', // 描述 (必填)
     link:'',  // 链接 (必填)
